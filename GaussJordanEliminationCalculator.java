@@ -295,10 +295,13 @@ public final class GaussJordanEliminationCalculator {
      *            the number of columns in the matrix
      * @param matrix
      *            the matrix to be printed
+     * @param isAugmented
+     *            a boolean which dictates whether to print the separate
+     *            augmented column
      *
      */
-    public static void printMatrix(int numRows, int numColumns,
-            double[] matrix) {
+    public static void printMatrix(int numRows, int numColumns, double[] matrix,
+            boolean isAugmented) {
 
         System.out.println();
 
@@ -321,12 +324,18 @@ public final class GaussJordanEliminationCalculator {
         } else {
             for (int i = 0; i < numRows; i++) {
                 for (int j = 0; j < numColumns; j++) {
+
                     double temp = matrix[i * numColumns + j];
                     String formattedTemp = format(temp);
                     if (j == 0) {
                         System.out.format("|%-25s", formattedTemp + " ");
                     } else if (j == numColumns - 1) {
-                        System.out.format("%-25s|", formattedTemp + " ");
+
+                        if (isAugmented) {
+                            System.out.format(" | %-25s|", formattedTemp + " ");
+                        } else {
+                            System.out.format("%-25s|", formattedTemp + " ");
+                        }
                     } else {
                         System.out.format("%-25s", formattedTemp + " ");
                     }
@@ -345,16 +354,36 @@ public final class GaussJordanEliminationCalculator {
      */
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
+        String answer;
 
         // Print a welcome banner for the user
         printWelcomeBanner();
+
+        while (true) {
+            System.out.print("Is this an augmented matrix? Enter Y/N: ");
+            answer = input.nextLine();
+
+            if ("Y".equals(answer) || "N".equals(answer)) {
+                break; // will only get to here if input was "Y" or "N"
+            } else {
+                System.out.println(
+                        "Invalid input for answer. Must be Y or N. Try again: ");
+            }
+        }
+
+        boolean isAugmented = "Y".equals(answer);
 
         /*
          * Read in the dimensions of the matrix from the user.
          */
         int numRows = getPositiveInteger("# of rows in the matrix: ", input);
-        int numColumns = getPositiveInteger("# of columns in the matrix: ",
+        int numColumns = getPositiveInteger(
+                "# of columns in the matrix (not including augmented column): ",
                 input);
+
+        if (isAugmented) {
+            numColumns++;
+        }
 
         /*
          * Initialize the matrix. It's a single dimensional array to allow for
@@ -399,7 +428,7 @@ public final class GaussJordanEliminationCalculator {
 
         // Printing the original matrix
         System.out.println("The original matrix: ");
-        printMatrix(numRows, numColumns, matrix);
+        printMatrix(numRows, numColumns, matrix, isAugmented);
 
         /*
          * Row reduces the matrix by taking care of one row and one column at a
@@ -412,10 +441,11 @@ public final class GaussJordanEliminationCalculator {
         matrix = order(matrix, numColumns, numRows);
 
         System.out.println("The row reduced matrix: ");
-        printMatrix(numRows, numColumns, matrix);
+        printMatrix(numRows, numColumns, matrix, isAugmented);
 
         // Close input scanner
         input.close();
     }
 
 }
+
