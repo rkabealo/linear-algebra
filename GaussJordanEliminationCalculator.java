@@ -22,7 +22,7 @@ public final class GaussJordanEliminationCalculator {
     /**
      * A double used in comparison.
      */
-    public static double EPSILON = 1e-15;
+    public static final double EPSILON = 1e-15;
 
     /**
      * Prints a small welcome banner for the user.
