@@ -1,11 +1,12 @@
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
- * A program which reads in a valid matrix (checks for valid number of rows,
- * number of columns, and valid elements) and reduces it using Gauss-Jordan
- * elimination.
+ * A program which reads in a valid m x n matrix (checks for valid number of
+ * rows, number of columns, and valid elements) and reduces it using
+ * Gauss-Jordan elimination.
  *
  * @author Ruksana Kabealo
  *
@@ -48,7 +49,7 @@ public final class GaussJordanEliminationCalculator {
      * @return formattedValue the formatted version of number
      */
     public static String format(double number) {
-        DecimalFormat df = new DecimalFormat("#,##0.0000000000");
+        DecimalFormat df = new DecimalFormat("#,##0.0000");
         df.setRoundingMode(RoundingMode.HALF_UP);
         String formattedValue = df.format(number);
         formattedValue = formattedValue.replaceAll("^-(?=0(.0*)?$)", "");
@@ -209,6 +210,82 @@ public final class GaussJordanEliminationCalculator {
     }
 
     /**
+     * Orders the rows of the reduced matrix to get a true Gauss-Jordan
+     * eliminated row-reduced matrix.
+     *
+     * @param numColumns
+     *            the number of columns in matrix
+     * @param minimumRow
+     *            the row being swapped with the first row
+     * @param matrix
+     *            the matrix being modified
+     */
+    public static void swap(double[] matrix, int minimumRow, int numColumns) {
+
+        for (int z = 0; z < numColumns; z++) {
+            double temp = matrix[0 * numColumns + z];
+            matrix[0 * numColumns + z] = matrix[minimumRow * numColumns + z];
+            matrix[minimumRow * numColumns + z] = temp;
+        }
+    }
+
+    /**
+     * Orders the rows of the reduced matrix to get a true Gauss-Jordan
+     * eliminated row-reduced matrix.
+     *
+     * @param numColumns
+     *            the number of columns in matrix
+     * @param numRows
+     *            the number of rows in matrix
+     * @param matrix
+     *            the matrix being ordered
+     * @return matrix returns the ordered matrix
+     */
+    public static double[] order(double[] matrix, int numColumns, int numRows) {
+
+        int minJumps = numColumns;
+        int minAtRow = 0;
+
+        if (numRows > 1) {
+            for (int i = 0; i < numRows; i++) {
+
+                for (int j = 0; j < numColumns; j++) {
+                    double element = matrix[i * numColumns + j];
+
+                    int tempJumps = numColumns + 1;
+
+                    // Once we encounter a nonzero element in the row
+                    if (Math.abs(element - 0) > EPSILON) {
+
+                        // Record the number of jumps to get there
+                        tempJumps = j;
+
+                        /*
+                         * If the number of jumps to get there is less than that
+                         * of the rows already traversed through, replace
+                         * minJumps and record which row it occurred in.
+                         */
+                        if (tempJumps < minJumps) {
+                            minJumps = j;
+                            minAtRow = i;
+                        }
+                    }
+                }
+            }
+
+            swap(matrix, minAtRow, numColumns);
+
+            double[] orderedSubmatrix = order(Arrays.copyOfRange(matrix,
+                    0 * numColumns + numColumns, numRows * numColumns),
+                    numColumns, numRows - 1);
+
+            System.arraycopy(orderedSubmatrix, 0, matrix, numColumns,
+                    orderedSubmatrix.length);
+        }
+        return matrix;
+    }
+
+    /**
      * Prints a matrix.
      *
      *
@@ -331,6 +408,8 @@ public final class GaussJordanEliminationCalculator {
         for (int r = 0; r < numRows; r++) {
             reduceRowAndColumn(r, 0, numColumns, numRows, matrix);
         }
+
+        matrix = order(matrix, numColumns, numRows);
 
         System.out.println("The row reduced matrix: ");
         printMatrix(numRows, numColumns, matrix);
